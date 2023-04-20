@@ -3,13 +3,12 @@ import styled from "styled-components";
 import SearchIcon from "@mui/icons-material/Search";
 import { Badge } from "@mui/material";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
-import Announcement from "./Announcement";
 import { mobile } from "../responsive";
+import { useSelector } from "react-redux";
 
 const Container = styled.div`
-  height: 60px;
+  height: 40px;
   padding: 20px;
-
   ${mobile({
     height: "50px",
     marginBottom: "10px",
@@ -38,18 +37,9 @@ const Language = styled.span`
   ${mobile({ display: "none" })}
 `;
 
-const SearchContainer = styled.div`
-  border: 0.5px solid lightgray;
-  display: flex;
-  align-items: center;
-  margin-left: 20px;
-`;
-const Input = styled.input`
-  border: none;
-  ${mobile({ width: "50px" })}
-`;
-
 const Center = styled.div`
+  display: flex;
+  justify-content: center;
   flex: 1;
   text-align: center;
 `;
@@ -76,24 +66,28 @@ const MenuItem = styled.div`
 `;
 
 const Navbar = () => {
+  const totalQuantities = useSelector((state) => state.cart.totalQuantities);
+  console.log(totalQuantities);
+
   return (
     <>
-      <Announcement />
       <Container>
         <Wrapper>
           <Left>
-            <Language>EN</Language>
-            <SearchContainer>
-              <Input placeholder="search" />
-              <SearchIcon style={{ color: "gray", fontSize: 16 }} />
-            </SearchContainer>
-          </Left>
-          <Center>
             <Link
               to="/"
               style={{ textDecoration: "inherit", color: "inherit" }}
             >
               <Logo>SELORM.DEV</Logo>
+            </Link>
+          </Left>
+          <Center>
+            <Link to="/cart">
+              <MenuItem>
+                <Badge badgeContent={totalQuantities} color="error">
+                  <ShoppingCartOutlinedIcon color="action" />
+                </Badge>
+              </MenuItem>
             </Link>
           </Center>
           <Right>
@@ -108,13 +102,6 @@ const Navbar = () => {
               style={{ textDecoration: "inherit", color: "inherit" }}
             >
               <MenuItem>Login</MenuItem>
-            </Link>
-            <Link to="/cart">
-              <MenuItem>
-                <Badge badgeContent={4} color="secondary">
-                  <ShoppingCartOutlinedIcon color="action" />
-                </Badge>
-              </MenuItem>
             </Link>
           </Right>
         </Wrapper>

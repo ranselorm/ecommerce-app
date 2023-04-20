@@ -1,6 +1,10 @@
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import styled from "@emotion/styled";
 import Newsletter from "../components/Newsletter";
 import { mobile } from "../responsive";
+import { useDispatch } from "react-redux";
+import { cartActions } from "../redux/store";
 
 const Container = styled.div``;
 const Wrapper = styled.div`
@@ -37,39 +41,6 @@ const Desc = styled.p`
 const Price = styled.span`
   font-weight: 100;
   font-size: 40px;
-`;
-
-const FilterContainer = styled.div`
-  width: 50%;
-  margin: 30px 0;
-  display: flex;
-  justify-content: space-between;
-  ${mobile({ width: "100%" })}
-`;
-const Filter = styled.div`
-  display: flex;
-  align-items: center;
-`;
-const FilterTitle = styled.span`
-  font-size: 20px;
-  font-weight: 200;
-`;
-const FilterColor = styled.div`
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background-color: ${(props) => props.color};
-  margin: 0 5px;
-  cursor: pointer;
-`;
-const FilterSelect = styled.select`
-  padding: 5px;
-  margin-left: 10px;
-  outline: none;
-  cursor: pointer;
-`;
-const FilterOption = styled.option`
-  cursor: pointer;
 `;
 
 const AddContainer = styled.div`
@@ -111,46 +82,72 @@ const Button = styled.button`
 `;
 
 const ProductPage = () => {
+  const [quantity, setQuantity] = useState(1);
+  const [product, setProduct] = useState(null);
+  const location = useLocation();
+  const productId = location.pathname.split("/")[2];
+  const dispatch = useDispatch();
+
+  const incQty = () => {
+    setQuantity((prevQty) => prevQty + 1);
+  };
+  const decQty = () => {
+    if (quantity > 1) {
+      setQuantity((prevQty) => prevQty - 1);
+    } else return 1;
+  };
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const response = await fetch(
+        `http://localhost:1337/api/products/${productId}?populate=*`
+      );
+      const data = await response.json();
+      setProduct(data.data);
+    };
+    fetchProducts();
+  }, []);
+
   return (
     <Container>
       <Wrapper>
         <ImageContainer>
-          <Image src="../images/black-shirt.png" alt="black shirt" />
+          <Image
+            src={
+              process.env.REACT_APP_UPLOAD_URL +
+              product?.attributes.image.data.attributes.url
+            }
+          />
         </ImageContainer>
         <InfoContainer>
-          <Title>Black Shirt</Title>
-          <Desc>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Nam eum,
-            reprehenderit exercitationem asperiores deleniti velit tempore
-            provident sit doloremque qui optio fugit, vero iste? Eum vitae
-            consequatur numquam ut modi.
-          </Desc>
-          <Price>$50</Price>
-          <FilterContainer>
-            <Filter>
-              <FilterTitle>Color:</FilterTitle>
-              <FilterColor color="black" />
-              <FilterColor color="darkblue" />
-              <FilterColor color="gray" />
-            </Filter>
-            <Filter>
-              <FilterTitle>Size:</FilterTitle>
-              <FilterSelect>
-                <FilterOption>XS</FilterOption>
-                <FilterOption>S</FilterOption>
-                <FilterOption>M</FilterOption>
-                <FilterOption>L</FilterOption>
-                <FilterOption>XL</FilterOption>
-              </FilterSelect>
-            </Filter>
-          </FilterContainer>
+          <Title>{product?.attributes.title}</Title>
+          <Desc>{product?.attributes.description}</Desc>
+          <Price>${product?.attributes.price}</Price>
+
           <AddContainer>
             <QtyContainer>
-              <QtyIcon>-</QtyIcon>
-              <Qty>1</Qty>
-              <QtyIcon>+</QtyIcon>
+              <QtyIcon onClick={decQty}>-</QtyIcon>
+              <Qty>{quantity}</Qty>
+              <QtyIcon onClick={incQty}>+</QtyIcon>
             </QtyContainer>
-            <Button>Add To Cart</Button>
+            <Button
+              onClick={() =>
+                dispatch(
+                  cartActions.addToCart({
+                    id: product.id,
+                    title: product.attributes.title,
+                    desc: product.attributes.description,
+                    image:
+                      process.env.REACT_APP_UPLOAD_URL +
+                      product.attributes.image.data.attributes.url,
+                    price: product.attributes.price,
+                    quantity,
+                  })
+                )
+              }
+            >
+              Add To Cart
+            </Button>
           </AddContainer>
         </InfoContainer>
       </Wrapper>

@@ -1,5 +1,9 @@
+import { Link } from "react-router-dom";
 import styled from "@emotion/styled";
 import { mobile } from "../responsive";
+import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { cartActions } from "../redux/store";
 
 const Container = styled.div``;
 const Wrapper = styled.div`
@@ -47,6 +51,7 @@ const Product = styled.div`
   display: flex;
   justify-content: space-between;
   padding: 20px;
+  border-bottom: 0.5px solid lightgray;
   ${mobile({ padding: "5px" })}
 `;
 
@@ -108,7 +113,7 @@ const PriceDetail = styled.div`
 `;
 
 const ProductPrice = styled.span`
-  font-size: 30px;
+  font-size: 22px;
   font-weight: 300;
 `;
 
@@ -143,91 +148,77 @@ const Button = styled.button`
 `;
 
 const Cart = () => {
+  const cartItems = useSelector((state) => state.cart.cartItems);
+  const totalQuantities = useSelector((state) => state.cart.totalQuantities);
+  const dispatch = useDispatch();
+
+  const grandTotal = cartItems.reduce(
+    (total, item) => (total += item.price * item.quantity),
+    0
+  );
   return (
     <Container>
       <Wrapper>
         <Title>Your Cart</Title>
         <TopContainer>
-          <TopButton>Continue Shopping</TopButton>
+          <Link to="/">
+            <TopButton>Continue Shopping</TopButton>
+          </Link>
           <TopTextContainer>
-            <TopText>Shopping Bag(2)</TopText>
+            <TopText>Shopping Bag({totalQuantities})</TopText>
             <TopText>Your Wishlist(0)</TopText>
           </TopTextContainer>
           <TopButton type="filled">Checkout Now</TopButton>
         </TopContainer>
         <BottomContainer>
           <Info>
-            <Product>
-              <ProductDetail>
-                <Image src="https://cdn.shopify.com/s/files/1/0297/2762/1253/products/369471-01-_2_36386f96-831f-4322-980f-8eb277510c28_1200x.jpg?v=1584045801" />
-                <Details>
-                  <ProductName>
-                    <b>Product: </b>Thunder Shoes
-                  </ProductName>
-                  <ProductID>
-                    <b>ID: </b>3210078201
-                  </ProductID>
-                  <ProductColor color="blue" />
+            {cartItems?.map((item) => (
+              <Product>
+                <ProductDetail>
+                  <Image src={item?.image} />
+                  <Details>
+                    <ProductName>
+                      <b>Product: </b>
+                      {item.title.toUpperCase()}
+                    </ProductName>
+                    <ProductColor color="blue" />
 
-                  <ProductSize>
-                    <b>Size: </b>37
-                  </ProductSize>
-                </Details>
-              </ProductDetail>
-              <PriceDetail>
-                <QtyContainer>
-                  <QtyIcon>-</QtyIcon>
-                  <Qty>1</Qty>
-                  <QtyIcon>+</QtyIcon>
-                </QtyContainer>
-                <ProductPrice>$120</ProductPrice>
-              </PriceDetail>
-            </Product>
-            <HR />
-            <Product>
-              <ProductDetail>
-                <Image src="../images/hoodie.png" />
-                <Details>
-                  <ProductName>
-                    <b>Product: </b>Sweat Pullover Hoodie
-                  </ProductName>
-                  <ProductID>
-                    <b>ID: </b>2021007502
-                  </ProductID>
-                  <ProductColor color="gray" />
-
-                  <ProductSize>
-                    <b>Size: </b>Large
-                  </ProductSize>
-                </Details>
-              </ProductDetail>
-              <PriceDetail>
-                <QtyContainer>
-                  <QtyIcon>-</QtyIcon>
-                  <Qty>3</Qty>
-                  <QtyIcon>+</QtyIcon>
-                </QtyContainer>
-                <ProductPrice>$120</ProductPrice>
-              </PriceDetail>
-            </Product>
+                    <ProductSize>
+                      <b>Size: </b>37
+                    </ProductSize>
+                  </Details>
+                </ProductDetail>
+                <PriceDetail>
+                  <QtyContainer>
+                    <QtyIcon>-</QtyIcon>
+                    <Qty>{item.quantity}</Qty>
+                    <QtyIcon
+                      onClick={() => dispatch(cartActions.increaseQty(item.id))}
+                    >
+                      +
+                    </QtyIcon>
+                  </QtyContainer>
+                  <ProductPrice>
+                    {item.quantity} * ${item.price}
+                  </ProductPrice>
+                </PriceDetail>
+              </Product>
+            ))}
           </Info>
           <Summary>
             <SummaryTitle>ORDER SUMMARY</SummaryTitle>
             <SummaryItem>
               <SummaryItemText>Subtotal: </SummaryItemText>
-              <SummaryItemPrice>$ 80</SummaryItemPrice>
+              <SummaryItemPrice>$ {grandTotal.toFixed(2)}</SummaryItemPrice>
             </SummaryItem>
+
             <SummaryItem>
-              <SummaryItemText>Estimated Shipping: </SummaryItemText>
-              <SummaryItemPrice>$ 3.99</SummaryItemPrice>
-            </SummaryItem>
-            <SummaryItem>
-              <SummaryItemText>Shiiping Discount: </SummaryItemText>
-              <SummaryItemPrice>$ -3.99</SummaryItemPrice>
+              <SummaryItemText>Total Items: </SummaryItemText>
+              <SummaryItemPrice>{totalQuantities}</SummaryItemPrice>
             </SummaryItem>
             <SummaryItem type="total">
               <SummaryItemText>Total: </SummaryItemText>
-              <SummaryItemPrice>$ 80</SummaryItemPrice>
+              <SummaryItemPrice>$ {grandTotal.toFixed(2)}</SummaryItemPrice>
             </SummaryItem>
             <Button>CHECKOUT NOW</Button>
           </Summary>

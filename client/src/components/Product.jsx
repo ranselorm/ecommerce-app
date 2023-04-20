@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import styled from "@emotion/styled";
 import { AiOutlineSearch, AiOutlineHeart } from "react-icons/ai";
 import { BiCartAdd } from "react-icons/bi";
@@ -92,7 +93,9 @@ const Product = ({ product }) => {
           <BiCartAdd />
         </Icon>
         <Icon>
-          <AiOutlineSearch />
+          <Link to={`/product/${product.id}`}>
+            <AiOutlineSearch />
+          </Link>
         </Icon>
         <Icon>
           <AiOutlineHeart />

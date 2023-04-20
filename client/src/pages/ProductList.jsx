@@ -60,7 +60,7 @@ const ProductList = () => {
   console.log("IN...", products);
   return (
     <Container>
-      <Title>PROUCTS</Title>
+      <Title>{category.toUpperCase()}</Title>
       <FilterContainer>
         <Filter>
           <FilterText>Filter By:</FilterText>
@@ -70,7 +70,7 @@ const ProductList = () => {
             <Option>Black</Option>
             <Option>Blue</Option>
             <Option>Yellow</Option>
-            <Option>Grren</Option>
+            <Option>Green</Option>
           </Select>
           <Select onChange={handleFilter} name="size">
             <Option disabled defaultValue="Size" />
